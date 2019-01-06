@@ -1,0 +1,11 @@
+public enum JarEditButtons {
+    ADD_PACKAGE,
+    DELETE_PACKAGE,
+    ADD_CLASS,
+    DELETE_CLASS,
+    ADD_METHOD,
+    DELETE_METHOD,
+    EDIT_METHOD,
+    ADD_FIELD,
+    DELETE_FIELD
+}
