@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 class JarEditor extends JFrame {
     private MainPane mainPane;
     private JarTree fileTree;
-    private ClassPool classPool = ClassPool.getDefault();
-
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
 
     JarEditor(String title) {
@@ -19,16 +17,16 @@ class JarEditor extends JFrame {
         // Set default close operation and size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(new Dimension(1024, 700));
-        // Set layout
+        // Set border layout
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setHgap(5);
         setLayout(borderLayout);
-        // Create menu bar
-        setJMenuBar(new MenuBar(this));
         // Init File Tree
         initScrollPaneWithJTree();
+        // Create menu bar
+        setJMenuBar(new MenuBar(this));
         // Init Side Panel
-        initSidePanel();
+        initMainPanel();
 
         setLocationRelativeTo(null);
         setVisible(true);
@@ -38,15 +36,7 @@ class JarEditor extends JFrame {
         return fileTree;
     }
 
-    ClassPool getClassPool() {
-        return classPool;
-    }
-
-    MainPane getMainPane() {
-        return mainPane;
-    }
-
-    private void initSidePanel() {
+    private void initMainPanel() {
         mainPane = new MainPane(fileTree);
         getContentPane().add(mainPane);
     }
@@ -55,14 +45,13 @@ class JarEditor extends JFrame {
         logger.info("Init ScrollPane and JTree.");
         fileTree = new JarTree();
         fileTree.addTreeSelectionListener(e -> {
-            if (fileTree.getJarFilePath() == null) return;
-            DefaultMutableTreeNode selected = fileTree.select(e.getPath());
-            CtClass ctClass = null;
-            if (!selected.isRoot())
-                ctClass = ((TreeNode) selected.getUserObject()).getCtClass();
-            if (ctClass != null) mainPane.getClassPanel().setCtClass(ctClass);
+            DefaultMutableTreeNode selectedNode = fileTree.getSelectedNode(e.getPath());
             DefaultMutableTreeNode dirNode = fileTree.getActiveDirectory();
-            mainPane.getPackagePanel().setActiveNodes(dirNode, selected);
+            mainPane.getPackagePanel().setActiveNodes(dirNode, selectedNode);
+            CtClass ctClass = ((TreeNode)selectedNode.getUserObject()).getCtClass();
+            if (ctClass != null)
+                mainPane.getClassPanel().setCtClass(ctClass);
+
         });
         JScrollPane treeScrollPane = new JScrollPane(fileTree,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,

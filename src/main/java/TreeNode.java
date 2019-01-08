@@ -9,21 +9,23 @@ import java.util.logging.Logger;
 
 public class TreeNode {
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
-    private JarFile jarFile;
-    private JarEntry entry;
     private byte[] fileBytes;
     private boolean baseNode;
     private boolean isDirectory;
-    private CtClass ctClass;
+    private CtClass ctClass = null;
     private String realName;
 
     TreeNode(JarFile jarFile, JarEntry entry, boolean baseNode) {
-        this.jarFile = jarFile;
-        this.entry = entry;
         this.baseNode = baseNode;
         this.isDirectory = entry.isDirectory();
         this.realName = entry.getRealName();
-        loadByteArray();
+        try {
+            InputStream in = jarFile.getInputStream(entry);
+            fileBytes = in.readAllBytes();
+            in.close();
+        } catch (IOException e) {
+            logger.warning(String.format("Couldn't create InputStream from JarEntry: %s", e.getMessage()));
+        }
         createCtClass();
     }
 
@@ -65,17 +67,6 @@ public class TreeNode {
         fileBytes = ctClass.toBytecode();
     }
 
-    private void loadByteArray() {
-        byte[] classByteArray = null;
-        try {
-            InputStream in = jarFile.getInputStream(entry);
-            classByteArray = in.readAllBytes();
-        } catch (IOException e) {
-            logger.warning("Couldn't create InputStream from JarEntry");
-        }
-        fileBytes = classByteArray;
-    }
-
     private void createCtClass() {
         if (!getRealName().endsWith(".class")) return;
         ClassPool classPool = ClassPool.getDefault();
@@ -83,15 +74,15 @@ public class TreeNode {
         classPool.insertClassPath(new ByteArrayClassPath(className, fileBytes));
         try {
             ctClass = classPool.get(className);
-            logger.info(String.format("Created CtClass from %s", entry.getRealName()));
+            logger.info(String.format("Created CtClass %s", className));
         } catch (NotFoundException e1) {
             logger.warning("Class not found!");
-            ctClass = null;
         }
     }
 
     @Override
     public String toString() {
+        if (realName.equals("")) return "Tree Root";
         return Paths.get(realName).getFileName().toString();
     }
 }

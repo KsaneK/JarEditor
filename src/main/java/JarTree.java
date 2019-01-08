@@ -1,6 +1,4 @@
 import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,27 +15,35 @@ import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.logging.Logger;
 
-class JarTree extends JTree {
+public class JarTree extends JTree {
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
     private Map<Path, DefaultMutableTreeNode> pathNodes = new LinkedHashMap<>();
-    private JarFile jarFile = null;
-    private String jarFilePath = null;
-    private DefaultMutableTreeNode activeDirectory;
+    private DefaultMutableTreeNode selected = null;
     private DefaultTreeModel model;
 
-    JarTree() {
-        super(new DefaultMutableTreeNode("No JAR selected"));
+    public JarTree() {
+        super(new DefaultMutableTreeNode(new TreeNode("")));
     }
 
-    String getJarFilePath() {
-        return jarFilePath;
+    public DefaultMutableTreeNode getActiveDirectory() {
+        TreeNode treeNode = (TreeNode) selected.getUserObject();
+        logger.info(String.format("Getting active directory for: %s", treeNode.toString()));
+        if (treeNode.isDirectory()) return selected;
+        else return pathNodes.get(Paths.get(treeNode.getRealName()).getParent());
     }
 
-    DefaultMutableTreeNode getActiveDirectory() {
-        return activeDirectory;
+    public DefaultMutableTreeNode getSelectedNode(TreePath path) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        if (node == null) {
+            logger.warning("Node is null.");
+            return null;
+        }
+        selected = node;
+        logger.info(String.format("Selected Path: %s", TreePathParser.getRealPath(path)));
+        return node;
     }
 
-    void exportToJar(File selectedFile) throws IOException {
+    public void exportToJar(File selectedFile) throws IOException {
         logger.info(String.format("Exporting to %s.", selectedFile.getAbsolutePath()));
         JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(selectedFile));
         ByteArrayInputStream inputStream;
@@ -53,6 +59,7 @@ class JarTree extends JTree {
                 logger.warning(e.getMessage());
                 JOptionPane.showMessageDialog(null, e.getMessage());
             }
+
             String realName = (treeNode.isDirectory()) ? treeNode.getRealName() + "/" : treeNode.getRealName();
             jarOutputStream.putNextEntry(new JarEntry(realName));
             if (!treeNode.isDirectory()) {
@@ -64,17 +71,11 @@ class JarTree extends JTree {
         jarOutputStream.close();
     }
 
-    /**
-     * Creates JTree from JAR file
-     * @param file JAR file
-     * @throws IOException thrown when can't create JarInputStream
-     */
-    void loadJar(File file) throws IOException {
+    public void loadJar(File file) throws IOException {
         logger.info("Loading " + file.getName());
-        jarFile = new JarFile(file);
-        jarFilePath = file.getAbsolutePath();
+        JarFile jarFile = new JarFile(file);
         JarInputStream jarInputStream = new JarInputStream(new FileInputStream(file));
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(file.getName()); // Use name of the file as root
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new TreeNode("")); // Use name of the file as root
         pathNodes.put(null, root);
         JarEntry entry;
         while ((entry = jarInputStream.getNextJarEntry()) != null) { // While entry is not null
@@ -94,37 +95,19 @@ class JarTree extends JTree {
         setModel(model);
     }
 
-    DefaultMutableTreeNode select(TreePath path) {
-        String realPath = TreePathParser.getRealPath(path);
-        Path p;
-        if (realPath == null) p = null;
-        else p = Paths.get(realPath);
-        DefaultMutableTreeNode node = pathNodes.get(p);
-        if (node == null) {
-            logger.warning("Node is null.");
-            return null;
-        }
-        setActivePath(node);
-        logger.info(String.format("Path: %s", TreePathParser.getRealPath(path)));
-        return node;
-    }
-
-    void addNode(Path path, DefaultMutableTreeNode node) {
+    public void addNode(Path path, DefaultMutableTreeNode node) {
         pathNodes.put(path, node);
     }
 
-    void reload() {
-        model.reload();
+    public DefaultMutableTreeNode getNode(Path path) {
+        return pathNodes.get(path);
     }
 
-    private void setActivePath(DefaultMutableTreeNode node) {
-        if (node.isRoot()) {
-            activeDirectory = node;
-        } else {
-            TreeNode treeNode = (TreeNode) node.getUserObject();
-            if (treeNode.isDirectory()) activeDirectory = node;
-            else activeDirectory = pathNodes.get(Paths.get(treeNode.getRealName()).getParent());
-        }
-        logger.info(String.format("Active directory: %s", activeDirectory.toString()));
+    public void deleteNode(Path path) {
+        pathNodes.remove(path);
+    }
+
+    public void reload() {
+        model.reload();
     }
 }

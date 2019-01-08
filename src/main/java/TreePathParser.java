@@ -10,8 +10,9 @@ class TreePathParser {
             builder.append("/");
         }
         String realPath = builder.toString();
-        if (realPath.length() == 0) return null;
-        return realPath.substring(0, realPath.length() - 1);
+        if(realPath.length()  > 0)
+            return realPath.substring(0, realPath.length() - 1);
+        return realPath;
     }
 
     static String getClassNameFromRealName(String realPath) {

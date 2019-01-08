@@ -48,7 +48,6 @@ class LabelPanel extends JPanel {
             int modifiers = method.getModifiers();
             methodLabels.get("return").setText(String.format("Return: %s", method.getReturnType().getName()));
             methodLabels.get("access").setText(String.format("Access: %s", getAccess(modifiers)));
-            methodLabels.get("interface").setText(String.format("isInterface: %b", Modifier.isInterface(modifiers)));
             methodLabels.get("abstract").setText(String.format("isAbstract: %b", Modifier.isAbstract(modifiers)));
             methodLabels.get("static").setText(String.format("isStatic: %b", Modifier.isStatic(modifiers)));
         } catch (NotFoundException e) {
@@ -66,7 +65,6 @@ class LabelPanel extends JPanel {
     void resetMethodLabels() {
         methodLabels.get("return").setText("Return: ");
         methodLabels.get("access").setText("Access: ");
-        methodLabels.get("interface").setText("IsInterface: ");
         methodLabels.get("static").setText("IsStatic: ");
         methodLabels.get("abstract").setText("IsAbstract: ");
     }
@@ -81,16 +79,15 @@ class LabelPanel extends JPanel {
     }
 
     private void initLabels() {
-        fieldLabels.put("FIELD", new JLabel("Field params"));
+        fieldLabels.put("FIELD", new JLabel("Field modifiers"));
         fieldLabels.put("type", new JLabel("Type: "));
         fieldLabels.put("access", new JLabel("Access: "));
         fieldLabels.put("static", new JLabel("IsStatic: "));
         fieldLabels.put("final", new JLabel("IsFinal: "));
 
-        methodLabels.put("METHOD", new JLabel("Method params"));
+        methodLabels.put("METHOD", new JLabel("Method modifiers"));
         methodLabels.put("return", new JLabel("Return: "));
         methodLabels.put("access", new JLabel("Access: "));
-        methodLabels.put("interface", new JLabel("isInterface: "));
         methodLabels.put("static", new JLabel("isStatic: "));
         methodLabels.put("abstract", new JLabel("isAbstract: "));
 

@@ -1,14 +1,10 @@
 import javassist.*;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Logger;
 
 class ClassEditor extends JFrame {
     private DefaultListModel<CtBehavior> model;
-    private JButton before;
-    private JButton overwrite;
-    private JButton after;
     private JCheckBox isConstructor;
     private JTextPane textPane;
     private CtBehavior ctBehavior = null;
@@ -45,24 +41,19 @@ class ClassEditor extends JFrame {
     }
 
     private void initButtons() {
-        before = new JButton("Prepend Method");
-        overwrite = new JButton((ctBehavior == null) ? "Create Method" : "Overwrite Method");
-        after = new JButton("Append Method");
-        if (ctBehavior == null) {
-            before.setVisible(false);
-            after.setVisible(false);
-        } else {
-            isConstructor.setVisible(false);
-        }
+        JButton before = new JButton("Prepend Method");
+        JButton overwrite = new JButton((ctBehavior == null) ? "Create Method" : "Overwrite Method");
+        JButton after = new JButton("Append Method");
+        before.setVisible(ctBehavior != null);
+        after.setVisible(ctBehavior != null);
+        isConstructor.setVisible(ctBehavior == null);
+
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(before);
         bottomPanel.add(overwrite);
         bottomPanel.add(after);
-        addButtonListeners();
-        add(bottomPanel);
-    }
-
-    private void addButtonListeners() {
+        before.addActionListener(e -> addCodeToMethod(true));
+        after.addActionListener(e -> addCodeToMethod(false));
         overwrite.addActionListener(e -> {
             if (ctBehavior != null) logger.info(String.format("Overwritting method %s", ctBehavior.getName()));
             else logger.info(String.format("Creating new method for class %s", ctClass.getName()));
@@ -74,14 +65,7 @@ class ClassEditor extends JFrame {
                 isConstructor.setVisible(false);
             }
         });
-        before.addActionListener(e -> {
-            logger.info(String.format("Adding code at the beggining of method %s.", ctBehavior));
-            addToMethod(true);
-        });
-        after.addActionListener(e -> {
-            logger.info(String.format("Adding code at the end of method %s.", ctBehavior));
-            addToMethod(false);
-        });
+        add(bottomPanel);
     }
 
     private void initTextPane() {
@@ -122,17 +106,13 @@ class ClassEditor extends JFrame {
         }
     }
 
-    private void addToMethod(boolean beginning) {
+    private void addCodeToMethod(boolean beginning) {
         String text = textPane.getText();
         try {
-            if (beginning) {
-                ctBehavior.insertBefore(text);
-                JOptionPane.showMessageDialog(null, "Added code at the beginning of the method.");
-            }
-            else {
-                ctBehavior.insertAfter(text);
-                JOptionPane.showMessageDialog(null, "Added code at the end of the method.");
-            }
+            JOptionPane.showMessageDialog(null,
+                    String.format("Added code at the %s of the method.", beginning ? "beginning" : "end"));
+            if (beginning) ctBehavior.insertBefore(text);
+            else ctBehavior.insertAfter(text);
         } catch (CannotCompileException e) {
             logger.warning("CannotCompileException " + e.getReason());
             JOptionPane.showMessageDialog(null, e.getMessage());

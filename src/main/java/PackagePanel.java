@@ -21,9 +21,10 @@ public class PackagePanel extends JPanel {
         initButtons();
         pkgBtns.get(JarEditButtons.ADD_PACKAGE).setEnabled(true);
         pkgBtns.get(JarEditButtons.ADD_CLASS).setEnabled(true);
+        pkgBtns.get(JarEditButtons.ADD_INTERFACE).setEnabled(true);
     }
 
-    void setActiveNodes(DefaultMutableTreeNode dir, DefaultMutableTreeNode node) {
+    public void setActiveNodes(DefaultMutableTreeNode dir, DefaultMutableTreeNode node) {
         dirNode = dir;
         activeNode = node;
         if (activeNode.isRoot()) {
@@ -37,52 +38,66 @@ public class PackagePanel extends JPanel {
             pkgBtns.get(JarEditButtons.DELETE_PACKAGE).setEnabled(true);
         else
             pkgBtns.get(JarEditButtons.DELETE_PACKAGE).setEnabled(false);
-        if (!treeNode.isBaseNode() && !treeNode.isDirectory())
+        if (!treeNode.isBaseNode() && !treeNode.isDirectory()) {
             pkgBtns.get(JarEditButtons.DELETE_CLASS).setEnabled(true);
-        else
+        } else {
             pkgBtns.get(JarEditButtons.DELETE_CLASS).setEnabled(false);
+        }
     }
 
     private void initButtons() {
         pkgBtns = new HashMap<>();
-        pkgBtns.put(JarEditButtons.ADD_PACKAGE, new JButton("Add package"));
-        pkgBtns.get(JarEditButtons.ADD_PACKAGE).setEnabled(false);
-        pkgBtns.put(JarEditButtons.DELETE_PACKAGE, new JButton("Delete package"));
-        pkgBtns.get(JarEditButtons.DELETE_PACKAGE).setEnabled(false);
-        pkgBtns.put(JarEditButtons.ADD_CLASS, new JButton("Add class to package"));
-        pkgBtns.get(JarEditButtons.ADD_CLASS).setEnabled(false);
-        pkgBtns.put(JarEditButtons.DELETE_CLASS, new JButton("Delete class from package"));
-        pkgBtns.get(JarEditButtons.DELETE_CLASS).setEnabled(false);
+        addButton(JarEditButtons.ADD_PACKAGE, "Add package");
+        addButton(JarEditButtons.DELETE_PACKAGE, "Delete package");
+        addButton(JarEditButtons.ADD_CLASS, "Add class");
+        addButton(JarEditButtons.ADD_INTERFACE, "Add interface");
+        addButton(JarEditButtons.DELETE_CLASS, "Delete class/interface");
 
         pkgBtns.get(JarEditButtons.DELETE_PACKAGE).addActionListener(this::deletePackage);
         pkgBtns.get(JarEditButtons.DELETE_CLASS).addActionListener(this::deleteClass);
-        pkgBtns.get(JarEditButtons.ADD_CLASS).addActionListener(this::addClass);
+        pkgBtns.get(JarEditButtons.ADD_CLASS).addActionListener(e -> addClass(false));
         pkgBtns.get(JarEditButtons.ADD_PACKAGE).addActionListener(this::addPackage);
+        pkgBtns.get(JarEditButtons.ADD_INTERFACE).addActionListener(e -> addClass(true));
+    }
 
-        for (JButton btn : pkgBtns.values()) add(btn);
+    private void addButton(JarEditButtons enumVal, String text) {
+        pkgBtns.put(enumVal, new JButton(text));
+        pkgBtns.get(enumVal).setEnabled(false);
+        add(pkgBtns.get(enumVal));
     }
 
     private void addPackage(ActionEvent e) {
+        if (dirNode == null) {
+            JOptionPane.showMessageDialog(null, "Select package before adding new package.");
+            return;
+        }
+        String realPath = JOptionPane.showInputDialog(null,
+                "Enter package name.",
+                "Package creation",
+                JOptionPane.PLAIN_MESSAGE);
+        realPath = ((TreeNode) dirNode.getUserObject()).getRealName() + realPath + "/";
+        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(new TreeNode(realPath));
+        dirNode.add(newNode);
+        jarTree.addNode(Paths.get(realPath), newNode);
+        jarTree.reload();
     }
 
-    private void addClass(ActionEvent e) {
+    private void addClass(boolean isInterface) {
+        if (dirNode == null) {
+            JOptionPane.showMessageDialog(null, "Select package before adding class.");
+            return;
+        }
         String realPath = JOptionPane.showInputDialog(null,
                 "Enter class name.",
                 "Class creation",
                 JOptionPane.PLAIN_MESSAGE);
-
-        if (!dirNode.isRoot())
-            realPath = ((TreeNode) dirNode.getUserObject()).getRealName() + realPath;
-        realPath += ".class";
+        realPath = ((TreeNode) dirNode.getUserObject()).getRealName() + realPath + ".class";
 
         String className = TreePathParser.getClassNameFromRealName(realPath);
         ClassPool classPool = ClassPool.getDefault();
-        CtClass newClass = classPool.makeClass(className);
-        try {
-            Class.forName(className);
-        } catch (ClassNotFoundException e1) {
-            logger.warning(String.format("Class %s not found.", className));
-        }
+        CtClass newClass;
+        if (isInterface)newClass = classPool.makeInterface(className);
+        else newClass = classPool.makeClass(className);
 
         TreeNode treeNode = new TreeNode(newClass, realPath);
 
@@ -93,13 +108,30 @@ public class PackagePanel extends JPanel {
     }
 
     private void deleteClass(ActionEvent e) {
+        jarTree.deleteNode(Paths.get(((TreeNode)activeNode.getUserObject()).getRealName()));
         dirNode.remove(activeNode);
         activeNode = dirNode;
         jarTree.reload();
     }
 
     private void deletePackage(ActionEvent e) {
+        if (activeNode.getChildCount() > 0) {
+            JOptionPane.showMessageDialog(null, "There are still entries in this package.");
+            return;
+        }
+        if (activeNode.isRoot()) {
+            JOptionPane.showMessageDialog(null, "You can't delete root node.");
+            return;
+        }
         TreeNode treeNode = (TreeNode) activeNode.getUserObject();
+        if (treeNode.isBaseNode()) {
+            JOptionPane.showMessageDialog(null, "You can't delete base file node.");
+        }
         logger.info(String.format("Deleting package %s", treeNode.getRealName()));
+        jarTree.deleteNode(Paths.get(treeNode.getRealName()));
+        if (dirNode == activeNode) dirNode = jarTree.getNode(Paths.get(treeNode.getRealName()).getParent());
+        dirNode.remove(activeNode);
+        activeNode = dirNode;
+        jarTree.reload();
     }
 }

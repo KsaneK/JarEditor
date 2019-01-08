@@ -1,5 +1,3 @@
-import javassist.NotFoundException;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.IOException;
@@ -13,19 +11,19 @@ class MenuBar extends JMenuBar {
         super();
         logger.info("Creating MenuBar.");
         parentFrame = frame;
-        JMenu file = new JMenu("File");
+        JMenu fileMenu = new JMenu("File");
         JMenuItem loadJarItem = new JMenuItem("Load JAR");
         JMenuItem exportJarItem = new JMenuItem("Export JAR");
         JMenuItem exitItem = new JMenuItem("Exit");
-        file.add(loadJarItem);
-        file.add(exportJarItem);
-        file.add(exitItem);
+        fileMenu.add(loadJarItem);
+        fileMenu.add(exportJarItem);
+        fileMenu.add(exitItem);
 
         addExitActionListener(exitItem);
         addLoadJarActionListener(loadJarItem);
         addExportJarActionListener(exportJarItem);
 
-        add(file);
+        add(fileMenu);
     }
 
     private void addExitActionListener(JMenuItem item) {
@@ -66,14 +64,10 @@ class MenuBar extends JMenuBar {
                 logger.info("Opening " + fc.getSelectedFile().getAbsolutePath());
                 try {
                     parentFrame.getFileTree().loadJar(fc.getSelectedFile());
-                    parentFrame.getClassPool().insertClassPath(parentFrame.getFileTree().getJarFilePath());
                 } catch (IOException ioException) {
                     logger.warning("IO Error.");
                     JOptionPane.showMessageDialog(parentFrame,
                             "Error. Make sure the selected file is correct.");
-                } catch (NotFoundException e1) {
-                    logger.warning("ClassPath not found.");
-                    e1.printStackTrace();
                 }
             } else if (selection == JFileChooser.CANCEL_OPTION) {
                 logger.info("Cancelled FileChooser");
