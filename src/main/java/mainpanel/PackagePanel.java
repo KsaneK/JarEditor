@@ -134,7 +134,7 @@ public class PackagePanel extends JPanel {
     }
 
     private void addPackage(ActionEvent e) {
-        if (dirNode == null) {
+        if (dirNode == null || !jarTree.isJarLoaded()) {
             JOptionPane.showMessageDialog(null, "Select package before adding new package.");
             return;
         }
@@ -150,7 +150,7 @@ public class PackagePanel extends JPanel {
     }
 
     private void addClass(boolean isInterface) {
-        if (dirNode == null) {
+        if (dirNode == null || !jarTree.isJarLoaded()) {
             JOptionPane.showMessageDialog(null, "Select package before adding class.");
             return;
         }

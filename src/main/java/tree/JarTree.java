@@ -23,10 +23,14 @@ public class JarTree extends JTree {
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
     private Map<Path, DefaultMutableTreeNode> pathNodes = new LinkedHashMap<>();
     private DefaultMutableTreeNode selected = null;
-    private DefaultTreeModel model;
+    private DefaultTreeModel model = null;
 
     public JarTree() {
         super(new DefaultMutableTreeNode(new TreeNode("")));
+    }
+
+    public boolean isJarLoaded() {
+        return model != null;
     }
 
     public DefaultMutableTreeNode getActiveDirectory() {
