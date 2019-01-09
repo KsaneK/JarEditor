@@ -2,6 +2,7 @@ package mainpanel;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.Modifier;
 import tree.JarTree;
 import tree.TreeNode;
 import utils.LoggerFormatter;
@@ -12,6 +13,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.ActionEvent;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -21,6 +23,7 @@ public class PackagePanel extends JPanel {
     private Map<JarEditButtons, JButton> pkgBtns;
     private DefaultMutableTreeNode dirNode = null;
     private DefaultMutableTreeNode activeNode = null;
+    private Map<String, JLabel> clsLabels;
 
     public PackagePanel(JarTree jarTree) {
         this.jarTree = jarTree;
@@ -28,6 +31,8 @@ public class PackagePanel extends JPanel {
         pkgBtns.get(JarEditButtons.ADD_PACKAGE).setEnabled(true);
         pkgBtns.get(JarEditButtons.ADD_CLASS).setEnabled(true);
         pkgBtns.get(JarEditButtons.ADD_INTERFACE).setEnabled(true);
+
+        addInfoPanel();
     }
 
     public void setActiveNodes(DefaultMutableTreeNode dir, DefaultMutableTreeNode node) {
@@ -49,6 +54,8 @@ public class PackagePanel extends JPanel {
         } else {
             pkgBtns.get(JarEditButtons.DELETE_CLASS).setEnabled(false);
         }
+        CtClass ctClass = ((TreeNode) activeNode.getUserObject()).getCtClass();
+        if (ctClass != null) setLabelsText(ctClass);
     }
 
     private void initButtons() {
@@ -70,6 +77,32 @@ public class PackagePanel extends JPanel {
         pkgBtns.put(enumVal, new JButton(text));
         pkgBtns.get(enumVal).setEnabled(false);
         add(pkgBtns.get(enumVal));
+    }
+
+    private void addInfoPanel() {
+        clsLabels = new LinkedHashMap<>();
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        clsLabels.put("interface", new JLabel());
+        clsLabels.put("abstract", new JLabel());
+        clsLabels.put("enum", new JLabel());
+        clsLabels.put("final", new JLabel());
+        clsLabels.put("synchronized", new JLabel());
+        for (JLabel label : clsLabels.values()) infoPanel.add(label);
+        add(infoPanel);
+    }
+
+    private void setLabelsText(CtClass ctClass) {
+        if (ctClass == null) {
+            for (JLabel label : clsLabels.values()) label.setText("");
+        } else {
+            int mod = ctClass.getModifiers();
+            clsLabels.get("interface").setText(String.format("isInterface: %b", Modifier.isInterface(mod)));
+            clsLabels.get("abstract").setText(String.format("isAbstract: %b", Modifier.isAbstract(mod)));
+            clsLabels.get("enum").setText(String.format("isEnum: %b", Modifier.isEnum(mod)));
+            clsLabels.get("final").setText(String.format("isFinal: %b", Modifier.isFinal(mod)));
+            clsLabels.get("synchronized").setText(String.format("isSynchronized: %b", Modifier.isSynchronized(mod)));
+        }
     }
 
     private void addPackage(ActionEvent e) {
