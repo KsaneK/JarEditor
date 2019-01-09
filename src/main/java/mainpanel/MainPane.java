@@ -1,11 +1,14 @@
+package mainpanel;
+
+import tree.JarTree;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 
-class MainPane extends JTabbedPane {
+public class MainPane extends JTabbedPane {
     private PackagePanel packagePanel;
     private ClassPanel classPanel;
 
-    MainPane(JarTree jarTree) {
+    public MainPane(JarTree jarTree) {
         super();
         packagePanel = new PackagePanel(jarTree);
         classPanel = new ClassPanel();
@@ -15,11 +18,11 @@ class MainPane extends JTabbedPane {
         setMnemonicAt(1, KeyEvent.VK_2);
     }
 
-    PackagePanel getPackagePanel() {
+    public PackagePanel getPackagePanel() {
         return packagePanel;
     }
 
-    ClassPanel getClassPanel() {
+    public ClassPanel getClassPanel() {
         return classPanel;
     }
 }

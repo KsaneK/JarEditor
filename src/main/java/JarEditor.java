@@ -1,16 +1,20 @@
 import javassist.*;
+import mainpanel.MainPane;
+import tree.JarTree;
+import tree.TreeNode;
+import utils.LoggerFormatter;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.util.logging.Logger;
 
-class JarEditor extends JFrame {
+public class JarEditor extends JFrame {
     private MainPane mainPane;
     private JarTree fileTree;
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
 
-    JarEditor(String title) {
+    public JarEditor(String title) {
         super(title);
 
         logger.info("Creating Jar Editor Frame.");
@@ -32,7 +36,7 @@ class JarEditor extends JFrame {
         setVisible(true);
     }
 
-    JarTree getFileTree() {
+    public JarTree getFileTree() {
         return fileTree;
     }
 

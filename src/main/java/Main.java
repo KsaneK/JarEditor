@@ -1,3 +1,5 @@
+import utils.LoggerFormatter;
+
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 

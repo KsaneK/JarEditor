@@ -1,7 +1,10 @@
+package mainpanel;
+
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
+import utils.LoggerFormatter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,14 +12,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-class LabelPanel extends JPanel {
+public class LabelPanel extends JPanel {
     private JPanel fieldPanel;
     private JPanel methodPanel;
     private Map<String, JLabel> fieldLabels;
     private Map<String, JLabel> methodLabels;
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
 
-    LabelPanel() {
+    public LabelPanel() {
         fieldLabels = new LinkedHashMap<>();
         methodLabels = new LinkedHashMap<>();
         setLayout(new GridLayout(1, 0));
@@ -31,7 +34,7 @@ class LabelPanel extends JPanel {
         add(methodPanel, 1);
     }
 
-    void setFieldLabels(CtField field) {
+    public void setFieldLabels(CtField field) {
         try {
             int modifiers = field.getModifiers();
             fieldLabels.get("type").setText(String.format("Type: %s", field.getType().getName()));
@@ -43,7 +46,7 @@ class LabelPanel extends JPanel {
         }
     }
 
-    void setMethodLabels(CtMethod method) {
+    public void setMethodLabels(CtMethod method) {
         try {
             int modifiers = method.getModifiers();
             methodLabels.get("return").setText(String.format("Return: %s", method.getReturnType().getName()));
@@ -55,14 +58,14 @@ class LabelPanel extends JPanel {
         }
     }
 
-    void resetFieldLabels() {
+    public void resetFieldLabels() {
         fieldLabels.get("type").setText("Return: ");
         fieldLabels.get("access").setText("Access: ");
         fieldLabels.get("static").setText("IsStatic: ");
         fieldLabels.get("final").setText("IsFinal: ");
     }
 
-    void resetMethodLabels() {
+    public void resetMethodLabels() {
         methodLabels.get("return").setText("Return: ");
         methodLabels.get("access").setText("Access: ");
         methodLabels.get("static").setText("IsStatic: ");

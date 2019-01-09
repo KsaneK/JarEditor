@@ -1,8 +1,10 @@
+package utils;
+
 import javax.swing.tree.TreePath;
 import java.util.Arrays;
 
-class TreePathParser {
-    static String getRealPath(TreePath path) {
+public class TreePathParser {
+    public static String getRealPath(TreePath path) {
         Object[] objPathArr = Arrays.copyOfRange(path.getPath(), 1, path.getPath().length);
         StringBuilder builder = new StringBuilder();
         for (Object obj : objPathArr) {
@@ -15,7 +17,7 @@ class TreePathParser {
         return realPath;
     }
 
-    static String getClassNameFromRealName(String realPath) {
+    public static String getClassNameFromRealName(String realPath) {
         realPath = realPath.substring(0, realPath.lastIndexOf("."));
         return realPath.replace("/", ".");
     }

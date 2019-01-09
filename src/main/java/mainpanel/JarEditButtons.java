@@ -1,3 +1,5 @@
+package mainpanel;
+
 public enum JarEditButtons {
     ADD_PACKAGE,
     DELETE_PACKAGE,

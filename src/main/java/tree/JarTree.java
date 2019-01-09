@@ -1,4 +1,8 @@
+package tree;
+
 import javassist.CannotCompileException;
+import utils.LoggerFormatter;
+import utils.TreePathParser;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
