@@ -21,13 +21,16 @@ public class PackagePanel extends JPanel {
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
     private JarTree jarTree;
     private Map<JarEditButtons, JButton> pkgBtns;
+    private Map<JarEditButtons, JButton> modBtns;
     private DefaultMutableTreeNode dirNode = null;
     private DefaultMutableTreeNode activeNode = null;
     private Map<String, JLabel> clsLabels;
+    private CtClass ctClass;
 
     public PackagePanel(JarTree jarTree) {
         this.jarTree = jarTree;
         initButtons();
+        addModButtons();
         pkgBtns.get(JarEditButtons.ADD_PACKAGE).setEnabled(true);
         pkgBtns.get(JarEditButtons.ADD_CLASS).setEnabled(true);
         pkgBtns.get(JarEditButtons.ADD_INTERFACE).setEnabled(true);
@@ -54,17 +57,22 @@ public class PackagePanel extends JPanel {
         } else {
             pkgBtns.get(JarEditButtons.DELETE_CLASS).setEnabled(false);
         }
-        CtClass ctClass = ((TreeNode) activeNode.getUserObject()).getCtClass();
-        if (ctClass != null) setLabelsText(ctClass);
+        ctClass = ((TreeNode) activeNode.getUserObject()).getCtClass();
+        if (ctClass != null) {
+            setLabelsText(ctClass);
+            for (JButton btn : modBtns.values()) btn.setEnabled(true);
+        } else {
+            for (JButton btn : modBtns.values()) btn.setEnabled(false);
+        }
     }
 
     private void initButtons() {
         pkgBtns = new HashMap<>();
-        addButton(JarEditButtons.ADD_PACKAGE, "Add package");
-        addButton(JarEditButtons.DELETE_PACKAGE, "Delete package");
-        addButton(JarEditButtons.ADD_CLASS, "Add class");
-        addButton(JarEditButtons.ADD_INTERFACE, "Add interface");
-        addButton(JarEditButtons.DELETE_CLASS, "Delete class/interface");
+        addButton(pkgBtns, JarEditButtons.ADD_PACKAGE, "Add package");
+        addButton(pkgBtns, JarEditButtons.DELETE_PACKAGE, "Delete package");
+        addButton(pkgBtns, JarEditButtons.ADD_CLASS, "Add class");
+        addButton(pkgBtns, JarEditButtons.ADD_INTERFACE, "Add interface");
+        addButton(pkgBtns, JarEditButtons.DELETE_CLASS, "Delete class/interface");
 
         pkgBtns.get(JarEditButtons.DELETE_PACKAGE).addActionListener(this::deletePackage);
         pkgBtns.get(JarEditButtons.DELETE_CLASS).addActionListener(this::deleteClass);
@@ -73,21 +81,41 @@ public class PackagePanel extends JPanel {
         pkgBtns.get(JarEditButtons.ADD_INTERFACE).addActionListener(e -> addClass(true));
     }
 
-    private void addButton(JarEditButtons enumVal, String text) {
-        pkgBtns.put(enumVal, new JButton(text));
-        pkgBtns.get(enumVal).setEnabled(false);
-        add(pkgBtns.get(enumVal));
+    private void addModButtons() {
+        modBtns = new HashMap<>();
+        addButton(modBtns, JarEditButtons.SET_CLASS_INTERFACE, "Toggle interface");
+        addButton(modBtns, JarEditButtons.SET_CLASS_ABSTRACT, "Toggle abstract");
+        addButton(modBtns, JarEditButtons.SET_CLASS_ENUM, "Toggle enum");
+        addButton(modBtns, JarEditButtons.SET_CLASS_FINAL, "Toggle final");
+        modBtns.get(JarEditButtons.SET_CLASS_INTERFACE).addActionListener(e -> toggleModifier(Modifier.INTERFACE));
+        modBtns.get(JarEditButtons.SET_CLASS_ABSTRACT).addActionListener(e -> toggleModifier(Modifier.ABSTRACT));
+        modBtns.get(JarEditButtons.SET_CLASS_ENUM).addActionListener(e -> toggleModifier(Modifier.ENUM));
+        modBtns.get(JarEditButtons.SET_CLASS_FINAL).addActionListener(e -> toggleModifier(Modifier.FINAL));
+    }
+
+    private void toggleModifier(int modifier) {
+        int classMod = ctClass.getModifiers();
+        if ((modifier & classMod) == modifier) modifier = classMod & ~modifier;
+        else modifier = classMod | modifier;
+        ctClass.setModifiers(modifier);
+        setLabelsText(ctClass);
+    }
+
+    private void addButton(Map<JarEditButtons, JButton> map, JarEditButtons enumVal, String text) {
+        map.put(enumVal, new JButton(text));
+        map.get(enumVal).setEnabled(false);
+        add(map.get(enumVal));
     }
 
     private void addInfoPanel() {
         clsLabels = new LinkedHashMap<>();
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        clsLabels.put("classname", new JLabel());
         clsLabels.put("interface", new JLabel());
         clsLabels.put("abstract", new JLabel());
         clsLabels.put("enum", new JLabel());
         clsLabels.put("final", new JLabel());
-        clsLabels.put("synchronized", new JLabel());
         for (JLabel label : clsLabels.values()) infoPanel.add(label);
         add(infoPanel);
     }
@@ -97,11 +125,11 @@ public class PackagePanel extends JPanel {
             for (JLabel label : clsLabels.values()) label.setText("");
         } else {
             int mod = ctClass.getModifiers();
+            clsLabels.get("classname").setText(ctClass.getName());
             clsLabels.get("interface").setText(String.format("isInterface: %b", Modifier.isInterface(mod)));
             clsLabels.get("abstract").setText(String.format("isAbstract: %b", Modifier.isAbstract(mod)));
             clsLabels.get("enum").setText(String.format("isEnum: %b", Modifier.isEnum(mod)));
             clsLabels.get("final").setText(String.format("isFinal: %b", Modifier.isFinal(mod)));
-            clsLabels.get("synchronized").setText(String.format("isSynchronized: %b", Modifier.isSynchronized(mod)));
         }
     }
 

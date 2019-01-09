@@ -20,7 +20,7 @@ public class JarEditor extends JFrame {
         logger.info("Creating Jar Editor Frame.");
         // Set default close operation and size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(new Dimension(1024, 700));
+        setSize(new Dimension(1100, 700));
         // Set border layout
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setHgap(5);
