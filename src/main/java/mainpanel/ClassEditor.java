@@ -113,10 +113,10 @@ public class ClassEditor extends JFrame {
     private void addCodeToMethod(boolean beginning) {
         String text = textPane.getText();
         try {
-            JOptionPane.showMessageDialog(null,
-                    String.format("Added code at the %s of the method.", beginning ? "beginning" : "end"));
             if (beginning) ctBehavior.insertBefore(text);
             else ctBehavior.insertAfter(text);
+            JOptionPane.showMessageDialog(null,
+                    String.format("Added code at the %s of the method.", beginning ? "beginning" : "end"));
         } catch (CannotCompileException e) {
             logger.warning("CannotCompileException " + e.getReason());
             JOptionPane.showMessageDialog(null, e.getMessage());
