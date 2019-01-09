@@ -1,9 +1,13 @@
+package mainpanel;
+
 import javassist.*;
+import utils.LoggerFormatter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Logger;
 
-class ClassEditor extends JFrame {
+public class ClassEditor extends JFrame {
     private DefaultListModel<CtBehavior> model;
     private JCheckBox isConstructor;
     private JTextPane textPane;
@@ -12,7 +16,7 @@ class ClassEditor extends JFrame {
 
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
 
-    ClassEditor(String title, CtClass ctClass, CtBehavior ctBehavior, DefaultListModel<CtBehavior> model) {
+    public ClassEditor(String title, CtClass ctClass, CtBehavior ctBehavior, DefaultListModel<CtBehavior> model) {
         super(title);
         this.ctClass = ctClass;
         this.ctBehavior = ctBehavior;
@@ -20,7 +24,7 @@ class ClassEditor extends JFrame {
         init();
     }
 
-    ClassEditor(String title, CtClass ctClass, DefaultListModel<CtBehavior> model) {
+    public ClassEditor(String title, CtClass ctClass, DefaultListModel<CtBehavior> model) {
         super(title);
         this.ctClass = ctClass;
         this.model = model;

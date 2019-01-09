@@ -1,4 +1,4 @@
-package Renderers;
+package renderers;
 
 import javassist.CtClass;
 

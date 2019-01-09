@@ -1,4 +1,8 @@
+package tree;
+
 import javassist.*;
+import utils.LoggerFormatter;
+import utils.TreePathParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +19,7 @@ public class TreeNode {
     private CtClass ctClass = null;
     private String realName;
 
-    TreeNode(JarFile jarFile, JarEntry entry, boolean baseNode) {
+    public TreeNode(JarFile jarFile, JarEntry entry, boolean baseNode) {
         this.baseNode = baseNode;
         this.isDirectory = entry.isDirectory();
         this.realName = entry.getRealName();
@@ -29,40 +33,40 @@ public class TreeNode {
         createCtClass();
     }
 
-    TreeNode(CtClass ctClass, String realName) {
+    public TreeNode(CtClass ctClass, String realName) {
         this.ctClass = ctClass;
         this.realName = realName;
         isDirectory = false;
         baseNode = false;
     }
 
-    TreeNode(String realName) {
+    public TreeNode(String realName) {
         this.realName = realName;
         isDirectory = true;
         baseNode = false;
     }
 
-    byte[] getFileBytes() {
+    public byte[] getFileBytes() {
         return fileBytes;
     }
 
-    boolean isDirectory() {
+    public boolean isDirectory() {
         return isDirectory;
     }
 
-    String getRealName() {
+    public String getRealName() {
         return realName;
     }
 
-    CtClass getCtClass() {
+    public CtClass getCtClass() {
         return ctClass;
     }
 
-    boolean isBaseNode() {
+    public boolean isBaseNode() {
         return baseNode;
     }
 
-    void update() throws IOException, CannotCompileException {
+    public void update() throws IOException, CannotCompileException {
         if (ctClass == null) return;
         fileBytes = ctClass.toBytecode();
     }

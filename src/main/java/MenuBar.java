@@ -1,13 +1,16 @@
+import utils.LoggerFormatter;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-class MenuBar extends JMenuBar {
+public class MenuBar extends JMenuBar {
     private JarEditor parentFrame;
     private final Logger logger = Logger.getLogger(LoggerFormatter.class.getName());
 
-    MenuBar(JarEditor frame) {
+    public MenuBar(JarEditor frame) {
         super();
         logger.info("Creating MenuBar.");
         parentFrame = frame;
@@ -39,6 +42,7 @@ class MenuBar extends JMenuBar {
         item.addActionListener(e -> {
             logger.info("Showing file save dialog.");
             JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(new File("./"));
             int selection = fc.showSaveDialog(parentFrame);
             if (selection == JFileChooser.APPROVE_OPTION) {
                 logger.info("Save file approved.");
@@ -58,6 +62,7 @@ class MenuBar extends JMenuBar {
         item.addActionListener(e -> {
             logger.info("Showing file open dialog.");
             JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(new File("./"));
             fc.setFileFilter(new FileNameExtensionFilter("JAR files", "jar"));
             int selection = fc.showOpenDialog(parentFrame);
             if (selection == JFileChooser.APPROVE_OPTION) {

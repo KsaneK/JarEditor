@@ -1,5 +1,11 @@
+package mainpanel;
+
 import javassist.ClassPool;
 import javassist.CtClass;
+import tree.JarTree;
+import tree.TreeNode;
+import utils.LoggerFormatter;
+import utils.TreePathParser;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

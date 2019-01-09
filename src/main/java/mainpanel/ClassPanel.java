@@ -1,6 +1,9 @@
-import Renderers.CtClassRenderer;
-import Renderers.CtMemberRenderer;
+package mainpanel;
+
+import renderers.CtClassRenderer;
+import renderers.CtMemberRenderer;
 import javassist.*;
+import utils.LoggerFormatter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
