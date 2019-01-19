@@ -13,10 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarOutputStream;
+import java.util.jar.*;
 import java.util.logging.Logger;
 
 public class JarTree extends JTree {
@@ -91,13 +88,20 @@ public class JarTree extends JTree {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TreeNode(jarFile, entry, true)); // Create tree node
             Path path = Paths.get(entry.getRealName()); // Create entry path
             DefaultMutableTreeNode dirNode = pathNodes.get(path.getParent()); // Get node related to directory
+            if (dirNode == null && path.getParent() != null) {
+                dirNode = new DefaultMutableTreeNode(new TreeNode(path.getParent().toString() + "/"));
+                pathNodes.put(Paths.get(path.getParent().toString() + "/"), dirNode);
+            }
             dirNode.add(node); // Add entry node to directory node
             pathNodes.put(path, node); // Add node to map
         }
-        DefaultMutableTreeNode manifest = new DefaultMutableTreeNode(
-                new TreeNode(jarFile, jarFile.getJarEntry("META-INF/MANIFEST.MF"), true));
-        pathNodes.put(Paths.get("META-INF/MANIFEST.MF"), manifest);
-        pathNodes.get(Paths.get("META-INF")).add(manifest);
+        JarEntry manifestEntry = jarFile.getJarEntry(jarFile.MANIFEST_NAME);
+        if (manifestEntry != null) {
+            DefaultMutableTreeNode manifest = new DefaultMutableTreeNode(
+                    new TreeNode(jarFile, manifestEntry, true));
+            pathNodes.put(Paths.get(jarFile.MANIFEST_NAME), manifest);
+            pathNodes.get(Paths.get("META-INF")).add(manifest);
+        }
 
         model = new DefaultTreeModel(root);
         setModel(model);
